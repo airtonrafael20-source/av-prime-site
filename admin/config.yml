@@ -1,0 +1,92 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "images/gallery"
+public_folder: "/images/gallery"
+
+collections:
+  - name: "contato"
+    label: "Contato"
+    files:
+      - file: "content/contato.json"
+        label: "Informações de Contato"
+        name: "contato"
+        fields:
+          - { label: "E-mail", name: "email", widget: "string" }
+          - { label: "Telefone (como aparece no site)", name: "telefone_exibido", widget: "string" }
+          - { label: "WhatsApp (DDI+DDD+número, só dígitos)", name: "whatsapp_numero", widget: "string" }
+
+  - name: "galeria"
+    label: "Galeria de Fotos"
+    files:
+      - file: "content/gallery.json"
+        label: "Fotos do Portfólio"
+        name: "galeria"
+        fields:
+          - label: "Fotos"
+            name: "fotos"
+            widget: "list"
+            fields:
+              - { label: "Imagem", name: "arquivo", widget: "image" }
+              - { label: "Legenda (opcional)", name: "legenda", widget: "string", required: false }
+
+  - name: "depoimentos"
+    label: "Depoimentos"
+    files:
+      - file: "content/depoimentos.json"
+        label: "Comentários de Clientes"
+        name: "depoimentos"
+        fields:
+          - label: "Depoimentos"
+            name: "depoimentos"
+            widget: "list"
+            fields:
+              - { label: "Nome do cliente", name: "nome", widget: "string" }
+              - { label: "Empresa (opcional)", name: "empresa", widget: "string", required: false }
+              - { label: "Estrelas (1 a 5)", name: "estrelas", widget: "number", min: 1, max: 5, default: 5 }
+              - { label: "Comentário", name: "texto", widget: "text" }
+
+  - name: "configuracoes"
+    label: "Configurações do Site"
+    files:
+      - file: "content/settings.json"
+        label: "Nome e Aparência"
+        name: "settings"
+        fields:
+          - { label: "Nome da empresa", name: "nome_empresa", widget: "string" }
+          - { label: "Imagem de fundo do topo (opcional)", name: "imagem_fundo_hero", widget: "image", required: false, media_folder: "/images/fundo", public_folder: "/images/fundo" }
+
+  - name: "pagamento"
+    label: "Formas de Pagamento"
+    files:
+      - file: "content/pagamento.json"
+        label: "Formas de Pagamento Aceitas"
+        name: "pagamento"
+        fields:
+          - label: "Formas aceitas"
+            name: "formas"
+            widget: "list"
+            field: { label: "Forma", name: "forma", widget: "string" }
+
+  - name: "catalogo"
+    label: "Catálogo de Serviços e Preços"
+    files:
+      - file: "content/catalogo.json"
+        label: "Serviços, Cursos e Preços"
+        name: "catalogo"
+        fields:
+          - label: "Grupos de serviço"
+            name: "grupos"
+            widget: "list"
+            summary: "{{fields.numero}} — {{fields.nome}}"
+            fields:
+              - { label: "Número (ordem de exibição)", name: "numero", widget: "number" }
+              - { label: "Nome do grupo/serviço", name: "nome", widget: "string" }
+              - label: "Itens (campos que o cliente pode escolher)"
+                name: "itens"
+                widget: "list"
+                summary: "{{fields.nome}} — R$ {{fields.preco}}"
+                fields:
+                  - { label: "Nome do item", name: "nome", widget: "string" }
+                  - { label: "Preço (R$, só o número)", name: "preco", widget: "number" }

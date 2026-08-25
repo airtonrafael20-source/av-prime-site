@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Certificados — AV Prime Consultoria</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --azul:#17335A; --azul-escuro:#06101D; --dourado:#28D7A1; --dourado-claro:#6EE7C0;
+    --ouro:#B08D4E; --ouro-claro:#D8C193;
+    --linha:#D9D2C2; --bg:#F7F4EC;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Inter',sans-serif; background:#0A1420; color:#E8F1FB; padding:28px;}
+  .wrap{max-width:1200px; margin:0 auto;}
+  h1{font-family:'Poppins',sans-serif; font-size:22px; margin-bottom:4px;}
+  .sub{color:#9EB0C6; font-size:14px; margin-bottom:28px;}
+  .layout{display:grid; grid-template-columns:340px 1fr; gap:28px; align-items:start;}
+  @media (max-width:900px){ .layout{grid-template-columns:1fr;} }
+
+  .panel{background:#0D1B2E; border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:22px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:12px; font-weight:600; color:#9EB0C6; text-transform:uppercase; letter-spacing:0.03em; margin-bottom:6px;}
+  .field input, .field textarea, .field select{
+    width:100%; padding:10px 12px; border:1.5px solid rgba(255,255,255,0.12); border-radius:4px;
+    font-family:'Inter',sans-serif; font-size:14px; color:#E8F1FB; background:#10233B;
+  }
+  .field input:focus, .field textarea:focus{outline:none; border-color:#28D7A1;}
+  .btn{
+    width:100%; padding:12px; border:none; border-radius:4px; background:#28D7A1; color:#06101D;
+    font-weight:700; font-size:14px; cursor:pointer; margin-top:6px;
+  }
+  .btn:hover{background:#6EE7C0;}
+  .btn-secondary{background:transparent; border:1.5px solid rgba(255,255,255,0.2); color:#E8F1FB;}
+  .btn-secondary:hover{border-color:#28D7A1; color:#28D7A1;}
+  .hint{font-size:12px; color:#9EB0C6; margin-top:14px; line-height:1.5;}
+
+  /* ---------- CERTIFICATE PREVIEW ---------- */
+  .cert-stage{background:#0D1B2E; border-radius:10px; padding:28px; display:flex; justify-content:center; overflow:auto;}
+  .certificate{
+    width:1050px; height:742px; background:var(--bg); position:relative; flex-shrink:0;
+    font-family:'Inter',sans-serif; color:#2B2B2B; box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  }
+  .cert-border-outer{position:absolute; inset:18px; border:2px solid var(--ouro);}
+  .cert-border-inner{position:absolute; inset:26px; border:1px solid var(--ouro);}
+  .cert-corner{position:absolute; width:46px; height:46px; border:2px solid var(--azul);}
+  .cc-tl{top:26px; left:26px; border-right:none; border-bottom:none;}
+  .cc-tr{top:26px; right:26px; border-left:none; border-bottom:none;}
+  .cc-bl{bottom:26px; left:26px; border-right:none; border-top:none;}
+  .cc-br{bottom:26px; right:26px; border-left:none; border-top:none;}
+
+  .cert-content{position:absolute; inset:70px; display:flex; flex-direction:column; align-items:center; text-align:center;}
+  .cert-brand{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+  .cert-brand .mono{
+    font-family:'Poppins',sans-serif; font-weight:800; font-size:20px; color:var(--azul); letter-spacing:0.02em;
+  }
+  .cert-brand .mono span{color:var(--ouro);}
+  .cert-tagline{font-size:9.5px; letter-spacing:0.18em; text-transform:uppercase; color:#8a8477; margin-bottom:22px;}
+
+  .cert-title{
+    font-family:'Cormorant Garamond',serif; font-weight:700; font-size:46px; color:var(--azul);
+    letter-spacing:0.06em; text-transform:uppercase; margin-bottom:6px;
+  }
+  .cert-subtitle{font-size:11px; letter-spacing:0.25em; text-transform:uppercase; color:var(--ouro); margin-bottom:30px;}
+
+  .cert-body-text{font-size:15px; line-height:1.9; max-width:760px; color:#3A3A3A;}
+  .cert-name{
+    font-family:'Cormorant Garamond',serif; font-weight:700; font-size:34px; color:var(--azul);
+    margin:14px 0 6px; border-bottom:1px solid var(--ouro); padding-bottom:8px; display:inline-block; min-width:420px;
+  }
+  .cert-course{font-weight:700; color:var(--azul);}
+
+  .cert-meta-row{
+    display:flex; justify-content:center; gap:50px; margin-top:24px; font-size:12.5px; color:#5a5648;
+  }
+  .cert-meta-row b{color:#2B2B2B; display:block; font-size:13px;}
+
+  .cert-footer{
+    position:absolute; bottom:0; left:0; right:0; display:flex; justify-content:space-between;
+    align-items:flex-end; padding:0 12px;
+  }
+  .cert-sign{text-align:center; width:300px;}
+  .cert-sign .line{border-top:1px solid #2B2B2B; margin-bottom:6px;}
+  .cert-sign .name{font-weight:700; font-size:13px; color:var(--azul);}
+  .cert-sign .role{font-size:10px; color:#5a5648; line-height:1.4; padding:0 6px;}
+
+  .cert-seal{
+    width:92px; height:92px; border-radius:50%; border:2px solid var(--ouro);
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .cert-seal::before{
+    content:""; position:absolute; inset:6px; border:1px dashed var(--ouro); border-radius:50%;
+  }
+  .cert-seal-text{font-family:'Poppins',sans-serif; font-weight:800; font-size:10px; color:var(--azul); text-align:center; line-height:1.3;}
+
+  .cert-code{position:absolute; bottom:-22px; left:50%; transform:translateX(-50%); font-size:8.5px; color:#9a9484; letter-spacing:0.05em; white-space:nowrap;}
+
+  @media print{
+    body{background:#fff; padding:0;}
+    .panel, h1, .sub, .cert-stage{all:unset;}
+    .layout{display:block;}
+    .certificate{box-shadow:none; margin:0;}
+    @page{ size: A4 landscape; margin:0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Gerador de Certificados</h1>
+  <p class="sub">Preencha os dados e clique em "Imprimir / Salvar PDF" — a área administrativa apenas, não é uma página pública do site.</p>
+
+  <div class="layout">
+    <div class="panel" id="formPanel">
+      <div class="field">
+        <label>Nome do participante</label>
+        <input type="text" id="fName" value="Nome do Participante" oninput="update()">
+      </div>
+      <div class="field">
+        <label>Curso / Treinamento</label>
+        <input type="text" id="fCourse" value="Curso de Almoxarife" oninput="update()">
+      </div>
+      <div class="field">
+        <label>Carga horária</label>
+        <input type="text" id="fHours" value="20 horas" oninput="update()">
+      </div>
+      <div class="field">
+        <label>Data de conclusão</label>
+        <input type="text" id="fDate" value="15 de agosto de 2026" oninput="update()">
+      </div>
+      <div class="field">
+        <label>Cidade</label>
+        <input type="text" id="fCity" value="São Paulo/SP" oninput="update()">
+      </div>
+      <div class="field">
+        <label>Responsável técnico (assinatura)</label>
+        <input type="text" id="fSignName" value="Rafael" oninput="update()">
+      </div>
+      <div class="field">
+        <label>Cargo / Registro</label>
+        <input type="text" id="fSignRole" value="Técnico de Segurança do Trabalho — Reg. MTE" oninput="update()">
+      </div>
+      <div class="field">
+        <label>Código de validação</label>
+        <input type="text" id="fCode" value="" oninput="update()">
+      </div>
+
+      <button type="button" class="btn" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+      <button type="button" class="btn btn-secondary" onclick="generateCode()">Gerar novo código de validação</button>
+      <p class="hint">Dica: no diálogo de impressão, escolha "Salvar como PDF" e orientação Paisagem. O certificado ocupa uma página A4 inteira.</p>
+    </div>
+
+    <div class="cert-stage">
+      <div class="certificate" id="certificate">
+        <div class="cert-border-outer"></div>
+        <div class="cert-border-inner"></div>
+        <div class="cert-corner cc-tl"></div>
+        <div class="cert-corner cc-tr"></div>
+        <div class="cert-corner cc-bl"></div>
+        <div class="cert-corner cc-br"></div>
+
+        <div class="cert-content">
+          <div class="cert-brand">
+            <span class="mono">AV<span>·</span>PRIME</span>
+          </div>
+          <div class="cert-tagline">Consultoria em Almoxarifado · Estoque · Processos</div>
+
+          <div class="cert-title">Certificado</div>
+          <div class="cert-subtitle">de conclusão</div>
+
+          <div class="cert-body-text">
+            Certificamos que
+            <div class="cert-name" id="pName">Nome do Participante</div>
+            <br>
+            concluiu com aproveitamento o curso <span class="cert-course" id="pCourse">Curso de Almoxarife</span>,
+            com carga horária de <b id="pHours">20 horas</b>,
+            realizado em <span id="pCity">São Paulo/SP</span>, em <span id="pDate">15 de agosto de 2026</span>.
+          </div>
+
+          <div class="cert-footer">
+            <div class="cert-sign">
+              <div class="line"></div>
+              <div class="name" id="pSignName">Rafael</div>
+              <div class="role" id="pSignRole">Técnico de Segurança do Trabalho — Reg. MTE</div>
+            </div>
+            <div class="cert-seal">
+              <div class="cert-seal-text">AV PRIME<br>CONSULTORIA<br>★</div>
+            </div>
+            <div class="cert-sign">
+              <div class="line"></div>
+              <div class="name">AV Prime Consultoria</div>
+              <div class="role">avprimeconsultoria.com.br</div>
+            </div>
+          </div>
+          <div class="cert-code" id="pCode"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function generateCode(){
+    const code = 'AVP-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Date.now().toString().slice(-5);
+    document.getElementById('fCode').value = code;
+    update();
+  }
+  function update(){
+    document.getElementById('pName').textContent = document.getElementById('fName').value;
+    document.getElementById('pCourse').textContent = document.getElementById('fCourse').value;
+    document.getElementById('pHours').textContent = document.getElementById('fHours').value;
+    document.getElementById('pDate').textContent = document.getElementById('fDate').value;
+    document.getElementById('pCity').textContent = document.getElementById('fCity').value;
+    document.getElementById('pSignName').textContent = document.getElementById('fSignName').value;
+    document.getElementById('pSignRole').textContent = document.getElementById('fSignRole').value;
+    const code = document.getElementById('fCode').value;
+    document.getElementById('pCode').textContent = code ? ('Código de validação: ' + code) : '';
+  }
+  generateCode();
+  update();
+</script>
+</body>
+</html>
