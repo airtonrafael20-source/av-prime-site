@@ -55,7 +55,31 @@ collections:
         name: "settings"
         fields:
           - { label: "Nome da empresa", name: "nome_empresa", widget: "string" }
-          - { label: "Imagem de fundo do topo (opcional)", name: "imagem_fundo_hero", widget: "image", required: false, media_folder: "/images/fundo", public_folder: "/images/fundo" }
+          - { label: "Sua logo (opcional — substitui a logo padrão em todo o site)", name: "logo_path", widget: "image", required: false, media_folder: "/images/logo", public_folder: "/images/logo" }
+          - label: "Paleta de cores"
+            name: "paleta"
+            widget: "select"
+            default: "navy_teal"
+            options:
+              - { label: "Azul-marinho & Verde-água (atual)", value: "navy_teal" }
+              - { label: "Preto & Dourado", value: "black_gold" }
+              - { label: "Grafite & Âmbar", value: "charcoal_amber" }
+              - { label: "Roxo Profundo & Rosé Gold", value: "purple_rosegold" }
+              - { label: "Verde Floresta & Cobre", value: "forest_copper" }
+              - { label: "Azul-noite & Prata", value: "midnight_silver" }
+              - { label: "Expresso & Champanhe", value: "espresso_champagne" }
+              - { label: "Ardósia & Esmeralda", value: "slate_emerald" }
+              - { label: "Vinho & Ouro", value: "wine_gold" }
+              - { label: "Ônix & Platina", value: "onyx_platinum" }
+          - label: "Fundo do topo (hero)"
+            name: "tema_fundo"
+            widget: "select"
+            default: "caixotes"
+            options:
+              - { label: "Ilustração de caixotes 3D (atual)", value: "caixotes" }
+              - { label: "Gradiente liso, sem ilustração", value: "gradiente" }
+              - { label: "Minha própria imagem (definir abaixo)", value: "custom" }
+          - { label: "Imagem de fundo do topo (só se escolher 'Minha própria imagem' acima)", name: "imagem_fundo_hero", widget: "image", required: false, media_folder: "/images/fundo", public_folder: "/images/fundo" }
 
   - name: "pagamento"
     label: "Formas de Pagamento"
