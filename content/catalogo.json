@@ -51,7 +51,7 @@
     },
     {
       "numero": 6,
-      "nome": "IA aplicada às empresas",
+      "nome": "IA Aplicada às Empresas",
       "itens": [
         {"nome": "Diagnóstico de automação", "preco": 550},
         {"nome": "Automação de relatórios", "preco": 1050},

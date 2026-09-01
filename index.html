@@ -243,21 +243,23 @@
   .shead p{margin-top:14px; color:var(--cinza-suave); font-size:16px;}
 
   /* ---------- QUEM SOMOS ---------- */
-  .sobre .wrap{display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center;}
-  .sobre-visual{
-    background:var(--azul); border-radius:4px; padding:44px; color:var(--off);
-    position:relative; overflow:hidden;
+  .missao-toggle{
+    background:linear-gradient(135deg, var(--azul) 0%, var(--azul-escuro) 100%);
+    border-radius:10px; overflow:hidden;
   }
-  .sobre-visual::before{
-    content:""; position:absolute; inset:0;
-    background-image:repeating-linear-gradient(0deg, rgba(247,246,243,0.05) 0 1px, transparent 1px 34px);
+  .missao-toggle summary{
+    list-style:none; cursor:pointer; padding:22px 28px; display:flex; align-items:center; gap:14px;
+    -webkit-tap-highlight-color:transparent;
   }
-  .sobre-visual h3{color:var(--dourado-claro); font-size:20px; position:relative;}
-  .sobre-visual p{color:rgba(247,246,243,0.85); margin-top:14px; font-size:15px; position:relative;}
-  .valores-list{margin-top:24px; display:grid; gap:12px; position:relative;}
-  .valores-list div{display:flex; gap:10px; align-items:flex-start; font-size:14.5px;}
+  .missao-toggle summary::-webkit-details-marker{display:none;}
+  .missao-toggle .cg-chevron{margin-left:auto; color:var(--cinza-suave); transition:transform .2s ease; font-size:18px;}
+  .missao-toggle[open] .cg-chevron{transform:rotate(180deg); color:var(--dourado);}
+  .missao-content{padding:0 28px 28px; position:relative;}
+  .missao-content h3{color:var(--off); font-size:22px;}
+  .missao-content p{color:rgba(247,246,243,0.85); margin-top:12px; font-size:15px; max-width:640px;}
+  .valores-list{margin-top:20px; display:grid; gap:12px; position:relative;}
+  .valores-list div{display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:rgba(247,246,243,0.85);}
   .valores-list div::before{content:"—"; color:var(--dourado);}
-  @media (max-width:860px){ .sobre .wrap{grid-template-columns:1fr;} }
 
   /* ---------- DIFERENCIAIS ---------- */
   .diferenciais-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--linha); border:1px solid var(--linha);}
@@ -518,22 +520,39 @@
   .cart-clear-link:hover{color:#C0392B;}
 
   /* ---------- GALERIA ---------- */
-  .gal-controls{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:32px;}
+  .gal-toggle{
+    background:var(--bg2); border:1.5px solid var(--linha); border-radius:10px; overflow:hidden;
+  }
+  .gal-toggle summary{
+    list-style:none; cursor:pointer; padding:22px 28px; display:flex; align-items:center; gap:14px;
+    font-family:'Poppins',sans-serif; font-weight:700; font-size:16px; color:var(--off);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .gal-toggle summary::-webkit-details-marker{display:none;}
+  .gal-toggle .cg-chevron{margin-left:auto; color:var(--cinza-suave); transition:transform .2s ease; font-size:18px;}
+  .gal-toggle[open] .cg-chevron{transform:rotate(180deg); color:var(--dourado);}
+  .gal-controls{display:flex; gap:14px; flex-wrap:wrap; padding:0 28px 20px;}
   .gal-upload-btn{cursor:pointer; position:relative;}
   .btn-ghost-dark{border:1.5px solid var(--off); color:var(--off); background:transparent;}
   .btn-ghost-dark:hover{background:var(--azul); color:var(--off);}
   .gal-grid{
-    display:grid; grid-template-columns:repeat(4,1fr); gap:14px; min-height:60px;
+    display:grid; grid-template-columns:repeat(4,1fr); gap:16px; min-height:60px; padding:0 28px 28px;
   }
   .gal-empty{
     grid-column:1/-1; text-align:center; padding:44px 20px; color:var(--cinza-suave); font-size:14px;
     border:1.5px dashed var(--linha); border-radius:8px;
   }
   .gal-item{
-    position:relative; aspect-ratio:1; border-radius:6px; overflow:hidden; border:1px solid var(--linha);
-    background:var(--bg3);
+    position:relative; border-radius:8px; overflow:hidden; border:1px solid var(--linha);
+    background:var(--bg3); transition:border-color .16s ease, transform .16s ease;
   }
-  .gal-item img{width:100%; height:100%; object-fit:cover; display:block;}
+  .gal-item:hover{border-color:rgba(40,215,161,0.4); transform:translateY(-2px);}
+  .gal-item .gal-photo{width:100%; aspect-ratio:1; object-fit:cover; display:block;}
+  .gal-item .gal-caption{
+    padding:9px 11px; font-size:12px; color:var(--cinza-suave); border-top:1px solid var(--linha);
+    min-height:32px; display:flex; align-items:center;
+  }
+  .gal-item .gal-caption.empty{color:var(--linha); font-style:italic;}
   .gal-item .gal-remove{
     position:absolute; top:6px; right:6px; width:26px; height:26px; border-radius:50%;
     background:rgba(15,38,47,0.75); color:#fff; border:none; cursor:pointer; font-size:15px;
@@ -541,7 +560,7 @@
   }
   .gal-item .gal-remove:hover{background:#C0392B;}
   @media (max-width:860px){ .gal-grid{grid-template-columns:repeat(3,1fr);} }
-  @media (max-width:560px){ .gal-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .gal-grid{grid-template-columns:repeat(2,1fr); padding:0 16px 20px;} .gal-controls{padding:0 16px 16px;} }
 
   .top-gradient-bar{
     height:5px; width:100%;
@@ -679,28 +698,34 @@
 </section>
 
 <section class="sobre" id="sobre">
-  <div class="wrap">
-    <div>
+  <div class="wrap" style="display:block;">
+    <details class="missao-toggle">
+      <summary>
+        <span class="eyebrow" style="color:var(--dourado-claro);">Missão · Visão</span>
+        <span class="cg-chevron">⌄</span>
+      </summary>
+      <div class="missao-content">
+        <h3>Reduzir perdas, gerar clareza.</h3>
+        <p>Ajudar pequenas e médias empresas a reduzir perdas e ganhar eficiência através da organização de estoques e da padronização de processos.</p>
+        <div class="valores-list">
+          <div>Praticidade — soluções aplicáveis desde a 1ª semana.</div>
+          <div>Transparência — diagnóstico honesto, mesmo quando é difícil de ouvir.</div>
+          <div>Resultado mensurável — indicador de antes e depois em todo projeto.</div>
+          <div>Proximidade — atendimento direto ao dono do negócio.</div>
+          <div>Técnico de Segurança do Trabalho registrado no Ministério do Trabalho.</div>
+        </div>
+      </div>
+    </details>
+
+    <div style="margin-top:48px;">
       <span class="eyebrow">Quem somos</span>
       <h2 style="margin-top:10px; font-size:clamp(26px,3.4vw,34px);">Consultoria nascida do chão do almoxarifado, não da teoria.</h2>
-      <p style="margin-top:18px; color:var(--cinza-suave); font-size:16px;">
-        A Vectro Prime Consultoria & Almoxarifado nasceu da experiência prática à frente de almoxarifado, estoque e equipes de logística. Não somos uma consultoria genérica de gestão — somos especialistas em resolver o problema que mais corrói o lucro de pequenos e médios negócios: a desorganização de estoque e a falta de processos padronizados.
+      <p style="margin-top:18px; color:var(--cinza-suave); font-size:16px; max-width:720px;">
+        A Vectro Prime Consultoria & Almoxarifado nasceu da experiência prática à frente de almoxarifado, estoque e equipes de logística. Não somos uma consultoria genérica de gestão — somos especialistas em resolver o problema que mais corrói o lucro de pequenas e médias empresas: a desorganização de estoque e a falta de processos padronizados.
       </p>
-      <p style="margin-top:14px; color:var(--cinza-suave); font-size:16px;">
+      <p style="margin-top:14px; color:var(--cinza-suave); font-size:16px; max-width:720px;">
         Nosso diferencial central é simples: quem atende já geriu almoxarifado e equipe no dia a dia — conhece o problema por dentro, não apenas no papel.
       </p>
-    </div>
-    <div class="sobre-visual">
-      <span class="eyebrow" style="color:var(--dourado-claro);">Missão · Visão</span>
-      <h3>Reduzir perdas, gerar clareza.</h3>
-      <p>Ajudar pequenas e médias empresas a reduzir perdas e ganhar eficiência através da organização de estoques e da padronização de processos.</p>
-      <div class="valores-list">
-        <div>Praticidade — soluções aplicáveis desde a 1ª semana</div>
-        <div>Transparência — diagnóstico honesto, mesmo quando é difícil de ouvir</div>
-        <div>Resultado mensurável — indicador de antes e depois em todo projeto</div>
-        <div>Proximidade — atendimento direto ao dono do negócio</div>
-        <div>Técnico de segurança do trabalho registrado no Ministério do Trabalho</div>
-      </div>
     </div>
   </div>
 </section>
@@ -744,13 +769,18 @@
       <p>Fotos reais de projetos de organização de estoque e almoxarifado.</p>
     </div>
 
-    <div class="gal-controls">
-      <a href="/admin/" class="btn btn-primary" target="_blank" rel="noopener">🔒 Gerenciar fotos (área administrativa)</a>
-    </div>
-
-    <div class="gal-grid" id="galGrid">
-      <div class="gal-empty" id="galEmpty">Carregando fotos...</div>
-    </div>
+    <details class="gal-toggle">
+      <summary>
+        <span>Ver fotos dos projetos</span>
+        <span class="cg-chevron">⌄</span>
+      </summary>
+      <div class="gal-controls">
+        <a href="/admin/" class="btn btn-primary" target="_blank" rel="noopener">🔒 Gerenciar fotos (área administrativa)</a>
+      </div>
+      <div class="gal-grid" id="galGrid">
+        <div class="gal-empty" id="galEmpty">Carregando fotos...</div>
+      </div>
+    </details>
   </div>
 </section>
 
@@ -783,7 +813,7 @@
         <p>Planilhas sob medida — estoque, indicadores e financeiro básico — com treinamento de uso.</p>
       </div>
       <div class="serv-card">
-        <h4><span class="icon">6</span>IA aplicada às empresas</h4>
+        <h4><span class="icon">6</span>IA Aplicada às Empresas</h4>
         <p>Automação de relatórios e tarefas repetitivas com ferramentas de inteligência artificial.</p>
       </div>
       <div class="serv-card">
@@ -795,7 +825,7 @@
         <p>Implantação de CIPA e treinamentos de NRs, com técnico de segurança do trabalho registrado no Ministério do Trabalho.</p>
       </div>
       <div class="serv-card">
-        <h4><span class="icon">+</span>Projeto sob medida</h4>
+        <h4><span class="icon">+</span>Projeto sob Medida</h4>
         <p>Combinamos as frentes acima de acordo com o diagnóstico do seu negócio.</p>
       </div>
     </div>
@@ -988,12 +1018,12 @@
       <h2>Benefícios para o cliente</h2>
     </div>
     <div class="ben-grid">
-      <div class="ben-item"><div class="check">✓</div><p>Redução de perdas por vencimento, extravio ou erro de contagem</p></div>
-      <div class="ben-item"><div class="check">✓</div><p>Menos tempo perdido procurando produtos ou refazendo inventários</p></div>
-      <div class="ben-item"><div class="check">✓</div><p>Indicadores claros para decisões de compra e reposição</p></div>
-      <div class="ben-item"><div class="check">✓</div><p>Equipe treinada para manter a organização sem depender de consultoria externa</p></div>
-      <div class="ben-item"><div class="check">✓</div><p>Processo documentado, que sobrevive à saída de funcionários</p></div>
-      <div class="ben-item"><div class="check">✓</div><p>Relatório de acompanhamento comparando indicadores antes e depois</p></div>
+      <div class="ben-item"><div class="check">✓</div><p>Redução de perdas por vencimento, extravio ou erro de contagem.</p></div>
+      <div class="ben-item"><div class="check">✓</div><p>Menos tempo perdido procurando produtos ou refazendo inventários.</p></div>
+      <div class="ben-item"><div class="check">✓</div><p>Indicadores claros para decisões de compra e reposição.</p></div>
+      <div class="ben-item"><div class="check">✓</div><p>Equipe treinada para manter a organização sem depender de consultoria externa.</p></div>
+      <div class="ben-item"><div class="check">✓</div><p>Processo documentado, que sobrevive à saída de funcionários.</p></div>
+      <div class="ben-item"><div class="check">✓</div><p>Relatório de acompanhamento comparando indicadores antes e depois.</p></div>
     </div>
   </div>
 </section>
@@ -1052,6 +1082,19 @@
   </div>
 </footer>
 
+<script>
+  // Fetches a content file via the GitHub API instead of raw.githubusercontent.com.
+  // raw.githubusercontent.com sits behind a CDN that can hold a stale copy for
+  // several minutes regardless of cache-busting query strings — the GitHub API
+  // itself does not have that delay, so this is used for the two things people
+  // notice immediately after editing (colors/appearance and photos).
+  function AV_fetchLive(path){
+    const url = 'https://api.github.com/repos/airtonrafael20-source/av-prime-site/contents/' + path + '?ref=main';
+    return fetch(url, { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => JSON.parse(decodeURIComponent(escape(atob(data.content)))));
+  }
+</script>
 <script>
   // Shared WhatsApp number — read from whatever is already in the page's
   // links (works whether this is the original file or a previously saved,
@@ -1293,7 +1336,7 @@
       {nome:"Painel de indicadores (KPIs)", preco:850},
       {nome:"Treinamento de uso (1–2 sessões)", preco:300}
     ]},
-    {numero:6, nome:"IA aplicada às empresas", itens:[
+    {numero:6, nome:"IA Aplicada às Empresas", itens:[
       {nome:"Diagnóstico de automação", preco:550},
       {nome:"Automação de relatórios", preco:1050},
       {nome:"Automação de atendimento/respostas", preco:1050},
@@ -1513,14 +1556,13 @@
   }
 
   // Photo gallery — loaded from content/gallery.json, managed through the
-  // /admin panel (Decap CMS) so Rafael and Alexandre can each add/remove
-  // photos and it shows up here automatically, no file downloads needed.
+  // /admin panel so Rafael and Alexandre can each add/remove photos and set
+  // where each one was taken, showing up here automatically.
   (function(){
     const grid = document.getElementById('galGrid');
     const empty = document.getElementById('galEmpty');
 
-    fetch('https://raw.githubusercontent.com/airtonrafael20-source/av-prime-site/main/content/gallery.json?t=' + Date.now(), {cache:'no-store'})
-      .then(r => r.ok ? r.json() : Promise.reject())
+    AV_fetchLive('content/gallery.json')
       .then(data => {
         const fotos = (data && data.fotos) || [];
         if(fotos.length === 0){
@@ -1532,9 +1574,14 @@
           const item = document.createElement('div');
           item.className = 'gal-item';
           const img = document.createElement('img');
+          img.className = 'gal-photo';
           img.src = foto.arquivo;
           img.alt = foto.legenda || 'Foto de organização de estoque e almoxarifado — Vectro Prime Consultoria & Almoxarifado';
           item.appendChild(img);
+          const caption = document.createElement('div');
+          caption.className = 'gal-caption' + (foto.legenda ? '' : ' empty');
+          caption.textContent = foto.legenda || 'Local não informado';
+          item.appendChild(caption);
           grid.appendChild(item);
         });
       })
@@ -1594,8 +1641,7 @@
   };
 
   (function(){
-    fetch('https://raw.githubusercontent.com/airtonrafael20-source/av-prime-site/main/content/settings.json?t=' + Date.now(), {cache:'no-store'})
-      .then(r => r.ok ? r.json() : Promise.reject())
+    AV_fetchLive('content/settings.json')
       .then(data => {
         if(data.nome_empresa){
           document.title = document.title.replace('Vectro Prime Consultoria & Almoxarifado', data.nome_empresa);

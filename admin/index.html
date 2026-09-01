@@ -179,6 +179,23 @@
   </div>
 
   <div class="section">
+    <h2>Fotos da galeria</h2>
+    <p class="hint">Cada foto pode ter um local (ex: "Cliente em São Paulo/SP" ou "Armazém Zona Sul"). As fotos já existentes abaixo podem ser removidas; novas fotos podem ser adicionadas por baixo.</p>
+    <div id="galeriaList"></div>
+    <div class="field" style="margin-top:16px;">
+      <label>Adicionar nova foto</label>
+      <input type="file" id="gal_new_file" accept="image/*">
+    </div>
+    <div class="field">
+      <label>Local dessa foto (opcional)</label>
+      <input type="text" id="gal_new_legenda" placeholder="Ex: Cliente em São Paulo/SP">
+    </div>
+    <button class="btn btn-ghost" onclick="addNewGalleryPhoto()">+ Adicionar essa foto à lista</button>
+    <div style="margin-top:14px;"><button class="btn" onclick="saveGaleria()">Salvar galeria</button></div>
+    <p class="status" id="galeriaStatus"></p>
+  </div>
+
+  <div class="section">
     <h2>Catálogo de serviços e preços</h2>
     <p class="hint">Cada grupo é uma frente de serviço (o que aparece no orçamento do site).</p>
     <div id="catalogoList"></div>
@@ -347,6 +364,11 @@
       const depoimentos = await ghGetFile('content/depoimentos.json');
       renderDepoimentos(depoimentos.json.depoimentos || []);
     }catch(e){ renderDepoimentos([]); }
+
+    try{
+      const galeria = await ghGetFile('content/gallery.json');
+      renderGaleria(galeria.json.fotos || []);
+    }catch(e){ renderGaleria([]); }
 
     try{
       const catalogo = await ghGetFile('content/catalogo.json');
@@ -525,6 +547,74 @@
       await ghSaveFile('content/depoimentos.json', { depoimentos: deps }, 'Atualiza depoimentos');
       showStatus('depoimentosStatus', true, 'Salvo! O site atualiza em poucos segundos.');
     }catch(e){ showStatus('depoimentosStatus', false, e.message); }
+  }
+
+  // ---------- Galeria de fotos ----------
+  let galeriaPending = []; // { arquivo, legenda, _newFile? }
+
+  function renderGaleria(fotos){
+    galeriaPending = fotos.map(f => Object.assign({}, f));
+    redrawGaleriaList();
+  }
+
+  function redrawGaleriaList(){
+    const list = document.getElementById('galeriaList');
+    list.innerHTML = '';
+    galeriaPending.forEach((foto, idx)=>{
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <img src="${foto._previewUrl || foto.arquivo}" style="width:56px; height:56px; object-fit:cover; border-radius:4px; flex-shrink:0;">
+        <div class="field" style="flex:1;"><input value="${escapeHtml(foto.legenda||'')}" placeholder="Local da foto" data-idx="${idx}" class="gal-legenda-input"></div>
+        <button class="btn btn-danger" onclick="removeGaleriaPhoto(${idx})">Remover</button>`;
+      list.appendChild(row);
+    });
+    list.querySelectorAll('.gal-legenda-input').forEach(inp=>{
+      inp.addEventListener('input', (e)=>{
+        const idx = parseInt(e.target.dataset.idx, 10);
+        galeriaPending[idx].legenda = e.target.value;
+      });
+    });
+  }
+
+  function removeGaleriaPhoto(idx){
+    galeriaPending.splice(idx, 1);
+    redrawGaleriaList();
+  }
+
+  async function addNewGalleryPhoto(){
+    const fileInput = document.getElementById('gal_new_file');
+    const legendaInput = document.getElementById('gal_new_legenda');
+    const file = fileInput.files[0];
+    if(!file){
+      showStatus('galeriaStatus', false, 'Escolha um arquivo de foto primeiro.');
+      return;
+    }
+    const previewUrl = URL.createObjectURL(file);
+    galeriaPending.push({ arquivo: '', legenda: legendaInput.value.trim(), _newFile: file, _previewUrl: previewUrl });
+    redrawGaleriaList();
+    fileInput.value = '';
+    legendaInput.value = '';
+  }
+
+  async function saveGaleria(){
+    try{
+      for(const foto of galeriaPending){
+        if(foto._newFile){
+          const ext = foto._newFile.name.split('.').pop().toLowerCase();
+          const safeName = 'photo_' + Date.now() + '_' + Math.random().toString(36).slice(2,6) + '.' + ext;
+          const b64 = await readFileAsBase64(foto._newFile);
+          const path = 'images/gallery/' + safeName;
+          await ghSaveBinaryFile(path, b64, 'Adiciona nova foto à galeria');
+          foto.arquivo = '/' + path;
+          delete foto._newFile;
+          delete foto._previewUrl;
+        }
+      }
+      const fotos = galeriaPending.map(f => ({ arquivo: f.arquivo, legenda: f.legenda || '' }));
+      await ghSaveFile('content/gallery.json', { fotos }, 'Atualiza galeria de fotos');
+      showStatus('galeriaStatus', true, 'Salvo! O site atualiza em poucos segundos.');
+    }catch(e){ showStatus('galeriaStatus', false, e.message); }
   }
 
   function renderCatalogo(grupos){
