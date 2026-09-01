@@ -1,23 +1,441 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <title>AV Prime Consultoria — Painel de Administração</title>
-  <meta name="robots" content="noindex" />
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Área Administrativa — Vectro Prime</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --azul:#17335A; --azul-escuro:#06101D; --dourado:#28D7A1; --dourado-claro:#6EE7C0;
+    --bg:#0A1420; --bg2:#0D1B2E; --bg3:#112544; --cinza:#E8F1FB; --cinza-suave:#9EB0C6; --linha:rgba(255,255,255,0.10);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--cinza); font-family:'Inter',-apple-system,sans-serif; line-height:1.5;}
+  .wrap{max-width:920px; margin:0 auto; padding:32px 20px 80px;}
+  h1{font-size:22px; margin:0 0 4px;}
+  .sub{color:var(--cinza-suave); font-size:14px; margin:0 0 28px;}
+  h2{font-size:16px; color:var(--dourado-claro); margin:0 0 4px;}
+  .section{background:var(--bg2); border:1px solid var(--linha); border-radius:10px; padding:22px; margin-bottom:20px;}
+  .section p.hint{color:var(--cinza-suave); font-size:12.5px; margin:4px 0 16px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12px; font-weight:600; color:var(--cinza-suave); text-transform:uppercase; letter-spacing:0.03em; margin-bottom:5px;}
+  .field input, .field select, .field textarea{
+    width:100%; padding:10px 12px; border:1.5px solid var(--linha); border-radius:4px;
+    font-family:inherit; font-size:14px; color:var(--cinza); background:var(--bg3);
+  }
+  .field textarea{resize:vertical;}
+  .row{display:flex; gap:12px;}
+  .row .field{flex:1;}
+  .btn{
+    background:var(--dourado); color:var(--azul-escuro); border:none; padding:11px 20px; border-radius:4px;
+    font-weight:700; font-size:14px; cursor:pointer;
+  }
+  .btn:hover{background:var(--dourado-claro);}
+  .btn:disabled{opacity:0.5; cursor:not-allowed;}
+  .btn-ghost{background:transparent; border:1.5px solid var(--linha); color:var(--cinza);}
+  .btn-ghost:hover{border-color:var(--dourado);}
+  .btn-danger{background:transparent; border:1.5px solid #C0392B; color:#e88; font-size:12px; padding:6px 10px;}
+  .status{font-size:13px; margin-top:10px; padding:8px 12px; border-radius:4px; display:none;}
+  .status.ok{display:block; background:rgba(40,215,161,0.12); color:var(--dourado-claro);}
+  .status.err{display:block; background:rgba(192,57,43,0.15); color:#e88;}
+  .item-row{display:flex; gap:8px; align-items:flex-end; margin-bottom:10px; padding-bottom:10px; border-bottom:1px dashed var(--linha);}
+  .item-row .field{margin-bottom:0;}
+  .group-block{border:1px solid var(--linha); border-radius:6px; padding:14px; margin-bottom:14px;}
+  .group-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+  .lock-screen{max-width:380px; margin:80px auto; text-align:center;}
+  .lock-screen .field{text-align:left;}
+  #configForm.collapsed .field, #configForm.collapsed .btn{display:none;}
+  .config-toggle{cursor:pointer; color:var(--cinza-suave); font-size:12.5px; text-decoration:underline;}
+</style>
 </head>
 <body>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  <script>
-    if (window.netlifyIdentity) {
-      window.netlifyIdentity.on("init", user => {
-        if (!user) {
-          window.netlifyIdentity.on("login", () => {
-            document.location.href = "/admin/";
-          });
-        }
-      });
+
+<div class="wrap" id="lockScreen">
+  <div class="lock-screen">
+    <h1>Vectro Prime — Área Administrativa</h1>
+    <p class="sub">Acesso restrito. Digite a senha para continuar.</p>
+    <div class="section">
+      <div class="field"><label>Senha</label><input type="password" id="pwInput"></div>
+      <button class="btn" style="width:100%" onclick="tryUnlock()">Entrar</button>
+      <p class="status err" id="pwError">Senha incorreta.</p>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="mainPanel" style="display:none;">
+  <h1>Vectro Prime — Área Administrativa</h1>
+  <p class="sub">Edite o site aqui e clique em "Salvar" em cada seção — as mudanças vão direto para o site publicado.</p>
+
+  <div class="section">
+    <h2>⚙️ Conexão com o GitHub</h2>
+    <p class="hint">Preencha uma vez só — fica salvo neste navegador. <span class="config-toggle" onclick="toggleConfig()">mostrar/ocultar</span></p>
+    <div id="configForm" class="collapsed">
+      <div class="row">
+        <div class="field"><label>Usuário/organização do GitHub</label><input id="cfgOwner" placeholder="ex: airtonrafael"></div>
+        <div class="field"><label>Nome do repositório</label><input id="cfgRepo" placeholder="ex: av-prime-site"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Branch</label><input id="cfgBranch" value="main"></div>
+        <div class="field"><label>Token de acesso (Personal Access Token)</label><input id="cfgToken" type="password" placeholder="ghp_..."></div>
+      </div>
+      <button class="btn" onclick="saveConfig()">Salvar conexão</button>
+      <p class="status" id="configStatus"></p>
+      <p class="hint" style="margin-top:14px;">
+        <b>Como gerar o token (só precisa fazer isso uma vez):</b><br>
+        1. No GitHub, clica na sua foto (canto superior direito) → Settings<br>
+        2. Desce até "Developer settings" (no menu esquerdo, bem embaixo)<br>
+        3. "Personal access tokens" → "Tokens (classic)" → "Generate new token (classic)"<br>
+        4. Marca a caixinha <b>"repo"</b> (dá acesso completo aos repositórios)<br>
+        5. Clica em "Generate token" e copia o código que aparece (começa com "ghp_") — cola ele aqui em cima
+      </p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Identidade e aparência</h2>
+    <div class="field"><label>Nome da empresa</label><input id="s_nome_empresa"></div>
+    <div class="row">
+      <div class="field">
+        <label>Paleta de cores</label>
+        <select id="s_paleta">
+          <option value="navy_teal">Azul-marinho & Verde-água (atual)</option>
+          <option value="black_gold">Preto & Dourado</option>
+          <option value="charcoal_amber">Grafite & Âmbar</option>
+          <option value="purple_rosegold">Roxo Profundo & Rosé Gold</option>
+          <option value="forest_copper">Verde Floresta & Cobre</option>
+          <option value="midnight_silver">Azul-noite & Prata</option>
+          <option value="espresso_champagne">Expresso & Champanhe</option>
+          <option value="slate_emerald">Ardósia & Esmeralda</option>
+          <option value="wine_gold">Vinho & Ouro</option>
+          <option value="onyx_platinum">Ônix & Platina</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Fundo do topo (hero)</label>
+        <select id="s_tema_fundo">
+          <option value="caixotes">Ilustração de caixotes 3D</option>
+          <option value="gradiente">Gradiente liso, sem ilustração</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn" onclick="saveSettings()">Salvar identidade e aparência</button>
+    <p class="status" id="settingsStatus"></p>
+  </div>
+
+  <div class="section">
+    <h2>Contato</h2>
+    <div class="field"><label>E-mail</label><input id="c_email"></div>
+    <div class="row">
+      <div class="field"><label>Telefone (como aparece no site)</label><input id="c_telefone"></div>
+      <div class="field"><label>WhatsApp (só números, com DDI+DDD — ex: 5511900000000)</label><input id="c_whats"></div>
+    </div>
+    <button class="btn" onclick="saveContato()">Salvar contato</button>
+    <p class="status" id="contatoStatus"></p>
+  </div>
+
+  <div class="section">
+    <h2>Formas de pagamento</h2>
+    <p class="hint">Só informativo — não cobra nada pelo site.</p>
+    <div id="pagamentoList"></div>
+    <button class="btn btn-ghost" onclick="addPagamentoItem()">+ Adicionar forma</button>
+    <div style="margin-top:14px;"><button class="btn" onclick="savePagamento()">Salvar formas de pagamento</button></div>
+    <p class="status" id="pagamentoStatus"></p>
+  </div>
+
+  <div class="section">
+    <h2>Depoimentos de clientes</h2>
+    <div id="depoimentosList"></div>
+    <button class="btn btn-ghost" onclick="addDepoimentoItem()">+ Adicionar depoimento</button>
+    <div style="margin-top:14px;"><button class="btn" onclick="saveDepoimentos()">Salvar depoimentos</button></div>
+    <p class="status" id="depoimentosStatus"></p>
+  </div>
+
+  <div class="section">
+    <h2>Catálogo de serviços e preços</h2>
+    <p class="hint">Cada grupo é uma frente de serviço (o que aparece no orçamento do site).</p>
+    <div id="catalogoList"></div>
+    <button class="btn btn-ghost" onclick="addGrupo()">+ Adicionar grupo de serviço</button>
+    <div style="margin-top:14px;"><button class="btn" onclick="saveCatalogo()">Salvar catálogo</button></div>
+    <p class="status" id="catalogoStatus"></p>
+  </div>
+
+  <p style="text-align:center; margin-top:32px;">
+    <a href="/" style="color:var(--cinza-suave); font-size:13px;">← Voltar para o site</a>
+  </p>
+</div>
+
+<script>
+  const PASSWORD = 'vectroprime2026';
+  const CONFIG_KEY = 'vectro_admin_gh_config';
+
+  function tryUnlock(){
+    const val = document.getElementById('pwInput').value;
+    if(val === PASSWORD){
+      sessionStorage.setItem('vectro_admin_unlocked', '1');
+      showPanel();
+    } else {
+      document.getElementById('pwError').style.display = 'block';
     }
-  </script>
+  }
+  document.getElementById('pwInput').addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
+
+  function showPanel(){
+    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('mainPanel').style.display = 'block';
+    loadAllContent();
+  }
+  if(sessionStorage.getItem('vectro_admin_unlocked') === '1') showPanel();
+
+  function getConfig(){
+    try{ return JSON.parse(localStorage.getItem(CONFIG_KEY)) || {}; }catch(e){ return {}; }
+  }
+  function toggleConfig(){
+    document.getElementById('configForm').classList.toggle('collapsed');
+  }
+  function fillConfigForm(){
+    const cfg = getConfig();
+    document.getElementById('cfgOwner').value = cfg.owner || '';
+    document.getElementById('cfgRepo').value = cfg.repo || '';
+    document.getElementById('cfgBranch').value = cfg.branch || 'main';
+    document.getElementById('cfgToken').value = cfg.token || '';
+    if(!cfg.owner || !cfg.repo || !cfg.token){
+      document.getElementById('configForm').classList.remove('collapsed');
+    }
+  }
+  function saveConfig(){
+    const cfg = {
+      owner: document.getElementById('cfgOwner').value.trim(),
+      repo: document.getElementById('cfgRepo').value.trim(),
+      branch: document.getElementById('cfgBranch').value.trim() || 'main',
+      token: document.getElementById('cfgToken').value.trim()
+    };
+    localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
+    showStatus('configStatus', true, 'Conexão salva neste navegador.');
+    loadAllContent();
+  }
+
+  function showStatus(id, ok, msg){
+    const el = document.getElementById(id);
+    el.className = 'status ' + (ok ? 'ok' : 'err');
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(()=>{ el.style.display = 'none'; }, 6000);
+  }
+
+  async function ghGetFile(path){
+    const cfg = getConfig();
+    if(!cfg.owner || !cfg.repo || !cfg.token) throw new Error('Conexão com o GitHub não configurada.');
+    const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}?ref=${cfg.branch}`;
+    const res = await fetch(url, { headers: { Authorization: `token ${cfg.token}` } });
+    if(!res.ok) throw new Error('Não encontrei o arquivo ' + path + ' (status ' + res.status + ')');
+    const data = await res.json();
+    const content = decodeURIComponent(escape(atob(data.content)));
+    return { json: JSON.parse(content), sha: data.sha };
+  }
+
+  async function ghSaveFile(path, obj, message){
+    const cfg = getConfig();
+    if(!cfg.owner || !cfg.repo || !cfg.token) throw new Error('Conexão com o GitHub não configurada — preencha a seção "Conexão com o GitHub" no topo.');
+    const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`;
+    let sha = null;
+    try{
+      const getRes = await fetch(url + `?ref=${cfg.branch}`, { headers: { Authorization: `token ${cfg.token}` } });
+      if(getRes.ok){ const data = await getRes.json(); sha = data.sha; }
+    }catch(e){ /* file may not exist yet */ }
+    const contentStr = JSON.stringify(obj, null, 2);
+    const b64 = btoa(unescape(encodeURIComponent(contentStr)));
+    const body = { message: message, content: b64, branch: cfg.branch };
+    if(sha) body.sha = sha;
+    const putRes = await fetch(url, {
+      method: 'PUT',
+      headers: { Authorization: `token ${cfg.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if(!putRes.ok){
+      const errData = await putRes.json().catch(()=>({}));
+      throw new Error('Falha ao salvar (' + putRes.status + '): ' + (errData.message || 'erro desconhecido'));
+    }
+    return true;
+  }
+
+  async function loadAllContent(){
+    fillConfigForm();
+    const cfg = getConfig();
+    if(!cfg.owner || !cfg.repo || !cfg.token) return;
+
+    try{
+      const settings = await ghGetFile('content/settings.json');
+      document.getElementById('s_nome_empresa').value = settings.json.nome_empresa || '';
+      document.getElementById('s_paleta').value = settings.json.paleta || 'navy_teal';
+      document.getElementById('s_tema_fundo').value = settings.json.tema_fundo || 'caixotes';
+    }catch(e){ console.warn(e.message); }
+
+    try{
+      const contato = await ghGetFile('content/contato.json');
+      document.getElementById('c_email').value = contato.json.email || '';
+      document.getElementById('c_telefone').value = contato.json.telefone_exibido || '';
+      document.getElementById('c_whats').value = contato.json.whatsapp_numero || '';
+    }catch(e){ console.warn(e.message); }
+
+    try{
+      const pagamento = await ghGetFile('content/pagamento.json');
+      renderPagamento(pagamento.json.formas || []);
+    }catch(e){ renderPagamento([]); }
+
+    try{
+      const depoimentos = await ghGetFile('content/depoimentos.json');
+      renderDepoimentos(depoimentos.json.depoimentos || []);
+    }catch(e){ renderDepoimentos([]); }
+
+    try{
+      const catalogo = await ghGetFile('content/catalogo.json');
+      renderCatalogo(catalogo.json.grupos || []);
+    }catch(e){ renderCatalogo([]); }
+  }
+
+  async function saveSettings(){
+    try{
+      const current = await ghGetFile('content/settings.json').catch(()=>({json:{}}));
+      const obj = Object.assign({}, current.json, {
+        nome_empresa: document.getElementById('s_nome_empresa').value.trim(),
+        paleta: document.getElementById('s_paleta').value,
+        tema_fundo: document.getElementById('s_tema_fundo').value
+      });
+      await ghSaveFile('content/settings.json', obj, 'Atualiza identidade e aparência do site');
+      showStatus('settingsStatus', true, 'Salvo! O site atualiza em cerca de 1 minuto.');
+    }catch(e){ showStatus('settingsStatus', false, e.message); }
+  }
+
+  async function saveContato(){
+    try{
+      const obj = {
+        email: document.getElementById('c_email').value.trim(),
+        telefone_exibido: document.getElementById('c_telefone').value.trim(),
+        whatsapp_numero: document.getElementById('c_whats').value.trim().replace(/\D/g,'')
+      };
+      await ghSaveFile('content/contato.json', obj, 'Atualiza contato do site');
+      showStatus('contatoStatus', true, 'Salvo! O site atualiza em cerca de 1 minuto.');
+    }catch(e){ showStatus('contatoStatus', false, e.message); }
+  }
+
+  function renderPagamento(formas){
+    const list = document.getElementById('pagamentoList');
+    list.innerHTML = '';
+    formas.forEach(f => addPagamentoItem(f));
+    if(formas.length === 0) addPagamentoItem();
+  }
+  function addPagamentoItem(value){
+    const list = document.getElementById('pagamentoList');
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <div class="field" style="flex:1;"><input class="pg-forma" value="${value ? escapeHtml(value) : ''}" placeholder="Ex: Pix"></div>
+      <button class="btn btn-danger" onclick="this.parentElement.remove()">Remover</button>`;
+    list.appendChild(row);
+  }
+  async function savePagamento(){
+    try{
+      const formas = Array.from(document.querySelectorAll('.pg-forma')).map(i=>i.value.trim()).filter(Boolean);
+      await ghSaveFile('content/pagamento.json', { formas }, 'Atualiza formas de pagamento');
+      showStatus('pagamentoStatus', true, 'Salvo! O site atualiza em cerca de 1 minuto.');
+    }catch(e){ showStatus('pagamentoStatus', false, e.message); }
+  }
+
+  function renderDepoimentos(deps){
+    const list = document.getElementById('depoimentosList');
+    list.innerHTML = '';
+    deps.forEach(d => addDepoimentoItem(d));
+  }
+  function addDepoimentoItem(dep){
+    dep = dep || {};
+    const list = document.getElementById('depoimentosList');
+    const block = document.createElement('div');
+    block.className = 'group-block';
+    block.innerHTML = `
+      <div class="row">
+        <div class="field"><label>Nome</label><input class="dep-nome" value="${escapeHtml(dep.nome||'')}"></div>
+        <div class="field"><label>Empresa (opcional)</label><input class="dep-empresa" value="${escapeHtml(dep.empresa||'')}"></div>
+        <div class="field" style="max-width:120px;"><label>Estrelas</label><input class="dep-estrelas" type="number" min="1" max="5" value="${dep.estrelas||5}"></div>
+      </div>
+      <div class="field"><label>Comentário</label><textarea class="dep-texto" rows="2">${escapeHtml(dep.texto||'')}</textarea></div>
+      <button class="btn btn-danger" onclick="this.parentElement.remove()">Remover depoimento</button>`;
+    list.appendChild(block);
+  }
+  async function saveDepoimentos(){
+    try{
+      const blocks = document.querySelectorAll('#depoimentosList .group-block');
+      const deps = Array.from(blocks).map(b => ({
+        nome: b.querySelector('.dep-nome').value.trim(),
+        empresa: b.querySelector('.dep-empresa').value.trim(),
+        estrelas: parseInt(b.querySelector('.dep-estrelas').value, 10) || 5,
+        texto: b.querySelector('.dep-texto').value.trim()
+      })).filter(d => d.nome && d.texto);
+      await ghSaveFile('content/depoimentos.json', { depoimentos: deps }, 'Atualiza depoimentos');
+      showStatus('depoimentosStatus', true, 'Salvo! O site atualiza em cerca de 1 minuto.');
+    }catch(e){ showStatus('depoimentosStatus', false, e.message); }
+  }
+
+  function renderCatalogo(grupos){
+    const list = document.getElementById('catalogoList');
+    list.innerHTML = '';
+    grupos.forEach(g => addGrupo(g));
+  }
+  function addGrupo(grupo){
+    grupo = grupo || { numero: document.querySelectorAll('#catalogoList .group-block').length + 1, nome: '', itens: [] };
+    const list = document.getElementById('catalogoList');
+    const block = document.createElement('div');
+    block.className = 'group-block';
+    block.innerHTML = `
+      <div class="group-header">
+        <div class="row" style="flex:1;">
+          <div class="field" style="max-width:90px;"><label>Nº</label><input class="grp-numero" type="number" value="${grupo.numero||1}"></div>
+          <div class="field"><label>Nome do grupo</label><input class="grp-nome" value="${escapeHtml(grupo.nome||'')}"></div>
+        </div>
+        <button class="btn btn-danger" style="margin-left:10px;" onclick="this.closest('.group-block').remove()">Remover grupo</button>
+      </div>
+      <div class="itens-list"></div>
+      <button class="btn btn-ghost" style="font-size:12.5px; padding:6px 12px;" onclick="addItemToGroup(this)">+ Adicionar item</button>`;
+    list.appendChild(block);
+    const itensList = block.querySelector('.itens-list');
+    (grupo.itens || []).forEach(it => addItemRow(itensList, it));
+  }
+  function addItemToGroup(btn){
+    const itensList = btn.closest('.group-block').querySelector('.itens-list');
+    addItemRow(itensList, {});
+  }
+  function addItemRow(container, item){
+    item = item || {};
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <div class="field" style="flex:3;"><input class="it-nome" placeholder="Nome do item" value="${escapeHtml(item.nome||'')}"></div>
+      <div class="field" style="max-width:120px;"><input class="it-preco" type="number" placeholder="Preço R$" value="${item.preco||''}"></div>
+      <button class="btn btn-danger" onclick="this.parentElement.remove()">×</button>`;
+    container.appendChild(row);
+  }
+  async function saveCatalogo(){
+    try{
+      const groupBlocks = document.querySelectorAll('#catalogoList .group-block');
+      const grupos = Array.from(groupBlocks).map(gb => {
+        const itens = Array.from(gb.querySelectorAll('.itens-list .item-row')).map(row => ({
+          nome: row.querySelector('.it-nome').value.trim(),
+          preco: parseInt(row.querySelector('.it-preco').value, 10) || 0
+        })).filter(it => it.nome);
+        return {
+          numero: parseInt(gb.querySelector('.grp-numero').value, 10) || 1,
+          nome: gb.querySelector('.grp-nome').value.trim(),
+          itens: itens
+        };
+      }).filter(g => g.nome);
+      await ghSaveFile('content/catalogo.json', { grupos }, 'Atualiza catálogo de serviços e preços');
+      showStatus('catalogoStatus', true, 'Salvo! O site atualiza em cerca de 1 minuto.');
+    }catch(e){ showStatus('catalogoStatus', false, e.message); }
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+</script>
 </body>
 </html>
