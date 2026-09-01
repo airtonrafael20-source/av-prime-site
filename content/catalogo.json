@@ -4,82 +4,184 @@
       "numero": 1,
       "nome": "Organização de Almoxarifado",
       "itens": [
-        {"nome": "Diagnóstico de layout", "preco": 400},
-        {"nome": "Novo layout + endereçamento", "preco": 1300},
-        {"nome": "Etiquetagem e identificação", "preco": 650},
-        {"nome": "Manual de manutenção do layout", "preco": 350}
+        {
+          "nome": "Diagnóstico de layout",
+          "preco": 400
+        },
+        {
+          "nome": "Novo layout + endereçamento",
+          "preco": 1300
+        },
+        {
+          "nome": "Etiquetagem e identificação",
+          "preco": 650
+        },
+        {
+          "nome": "Manual de manutenção do layout",
+          "preco": 350
+        }
       ]
     },
     {
       "numero": 2,
       "nome": "Gestão de Estoques",
       "itens": [
-        {"nome": "Curva ABC", "preco": 500},
-        {"nome": "Estoque mín/máx e ponto de pedido", "preco": 750},
-        {"nome": "Planilha/dashboard de controle", "preco": 850},
-        {"nome": "Treinamento da equipe", "preco": 450}
+        {
+          "nome": "Curva ABC",
+          "preco": 500
+        },
+        {
+          "nome": "Estoque mín/máx e ponto de pedido",
+          "preco": 750
+        },
+        {
+          "nome": "Planilha/dashboard de controle",
+          "preco": 850
+        },
+        {
+          "nome": "Treinamento da equipe",
+          "preco": 450
+        }
       ]
     },
     {
       "numero": 3,
       "nome": "Inventários",
       "itens": [
-        {"nome": "Inventário geral (execução)", "preco": 1050},
-        {"nome": "Inventário cíclico (implantação)", "preco": 700},
-        {"nome": "Apuração e relatório de divergências", "preco": 450}
+        {
+          "nome": "Inventário geral (execução)",
+          "preco": 1050
+        },
+        {
+          "nome": "Inventário cíclico (implantação)",
+          "preco": 700
+        },
+        {
+          "nome": "Apuração e relatório de divergências",
+          "preco": 450
+        }
       ]
     },
     {
       "numero": 4,
       "nome": "Padronização de Processos",
       "itens": [
-        {"nome": "Mapeamento de processos atuais", "preco": 900},
-        {"nome": "Criação de POPs", "preco": 1100},
-        {"nome": "Fluxogramas", "preco": 450},
-        {"nome": "Checklist de execução", "preco": 300}
+        {
+          "nome": "Mapeamento de processos atuais",
+          "preco": 900
+        },
+        {
+          "nome": "Criação de POPs",
+          "preco": 1100
+        },
+        {
+          "nome": "Fluxogramas",
+          "preco": 450
+        },
+        {
+          "nome": "Checklist de execução",
+          "preco": 300
+        }
       ]
     },
     {
       "numero": 5,
       "nome": "Excel para Gestão",
       "itens": [
-        {"nome": "Planilha de controle de estoque", "preco": 650},
-        {"nome": "Planilha financeira básica", "preco": 650},
-        {"nome": "Painel de indicadores (KPIs)", "preco": 850},
-        {"nome": "Treinamento de uso (1–2 sessões)", "preco": 300}
+        {
+          "nome": "Planilha de controle de estoque",
+          "preco": 650
+        },
+        {
+          "nome": "Planilha financeira básica",
+          "preco": 650
+        },
+        {
+          "nome": "Painel de indicadores (KPIs)",
+          "preco": 850
+        },
+        {
+          "nome": "Treinamento de uso (1–2 sessões)",
+          "preco": 300
+        }
       ]
     },
     {
       "numero": 6,
       "nome": "IA aplicada às empresas",
       "itens": [
-        {"nome": "Diagnóstico de automação", "preco": 550},
-        {"nome": "Automação de relatórios", "preco": 1050},
-        {"nome": "Automação de atendimento/respostas", "preco": 1050},
-        {"nome": "Orientação de uso para a equipe", "preco": 400}
+        {
+          "nome": "Diagnóstico de automação",
+          "preco": 550
+        },
+        {
+          "nome": "Automação de relatórios",
+          "preco": 1050
+        },
+        {
+          "nome": "Automação de atendimento/respostas",
+          "preco": 1050
+        },
+        {
+          "nome": "Orientação de uso para a equipe",
+          "preco": 400
+        }
       ]
     },
     {
       "numero": 7,
       "nome": "Treinamentos e Cursos",
       "itens": [
-        {"nome": "Curso de Almoxarife (turma até 5 pessoas)", "preco": 900},
-        {"nome": "Treinamento de estoque e inventário (turma até 5 pessoas)", "preco": 900},
-        {"nome": "Treinamento de Excel aplicado (turma até 5 pessoas)", "preco": 900},
-        {"nome": "Material de apoio", "preco": 250},
-        {"nome": "Certificado de participação", "preco": 80}
+        {
+          "nome": "Curso de Almoxarife (turma até 5 pessoas)",
+          "preco": 900
+        },
+        {
+          "nome": "Treinamento de estoque e inventário (turma até 5 pessoas)",
+          "preco": 900
+        },
+        {
+          "nome": "Treinamento de Excel aplicado (turma até 5 pessoas)",
+          "preco": 900
+        },
+        {
+          "nome": "Material de apoio",
+          "preco": 250
+        },
+        {
+          "nome": "Certificado de participação",
+          "preco": 80
+        }
       ]
     },
     {
       "numero": 8,
       "nome": "Segurança do Trabalho",
       "itens": [
-        {"nome": "Implantação de CIPA (consultoria completa)", "preco": 1200},
-        {"nome": "Treinamento NR-05 — CIPA (por participante)", "preco": 200},
-        {"nome": "Treinamento NR-06 — uso de EPI (por participante)", "preco": 120},
-        {"nome": "Treinamento NR-11 — operação de empilhadeiras (por participante)", "preco": 350},
-        {"nome": "Treinamento NR-12 — máquinas e equipamentos (por participante)", "preco": 550},
-        {"nome": "Treinamento NR-35 — trabalho em altura (por participante)", "preco": 250}
+        {
+          "nome": "Implantação de CIPA (consultoria completa)",
+          "preco": 1200
+        },
+        {
+          "nome": "Treinamento NR-05 — CIPA (por participante)",
+          "preco": 200
+        },
+        {
+          "nome": "Treinamento NR-06 — uso de EPI (por participante)",
+          "preco": 120
+        },
+        {
+          "nome": "Treinamento NR-11 — operação de empilhadeiras (por participante)",
+          "preco": 350
+        },
+        {
+          "nome": "Treinamento NR-12 — máquinas e equipamentos (por participante)",
+          "preco": 550
+        },
+        {
+          "nome": "Treinamento NR-35 — trabalho em altura (por participante)",
+          "preco": 250
+        }
       ]
     }
   ]
