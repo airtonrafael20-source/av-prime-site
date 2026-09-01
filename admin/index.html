@@ -72,29 +72,50 @@
     <p class="hint">Preencha uma vez só — fica salvo neste navegador. <span class="config-toggle" onclick="toggleConfig()">mostrar/ocultar</span></p>
     <div id="configForm" class="collapsed">
       <div class="row">
-        <div class="field"><label>Usuário/organização do GitHub</label><input id="cfgOwner" placeholder="ex: airtonrafael"></div>
-        <div class="field"><label>Nome do repositório</label><input id="cfgRepo" placeholder="ex: av-prime-site"></div>
+        <div class="field"><label>Usuário/organização do GitHub</label><input id="cfgOwner" readonly style="opacity:0.6;"></div>
+        <div class="field"><label>Nome do repositório</label><input id="cfgRepo" readonly style="opacity:0.6;"></div>
       </div>
       <div class="row">
-        <div class="field"><label>Branch</label><input id="cfgBranch" value="main"></div>
-        <div class="field"><label>Token de acesso (Personal Access Token)</label><input id="cfgToken" type="password" placeholder="ghp_..."></div>
+        <div class="field"><label>Branch</label><input id="cfgBranch" readonly style="opacity:0.6;"></div>
+        <div class="field"><label>Seu token de acesso pessoal (Personal Access Token)</label><input id="cfgToken" type="password" placeholder="ghp_..."></div>
       </div>
-      <button class="btn" onclick="saveConfig()">Salvar conexão</button>
+      <button class="btn" onclick="saveConfig()">Salvar meu token</button>
       <p class="status" id="configStatus"></p>
       <p class="hint" style="margin-top:14px;">
-        <b>Como gerar o token (só precisa fazer isso uma vez):</b><br>
+        <b>Cada pessoa (você, seu sócio) usa seu próprio token, gerado na própria conta do GitHub:</b><br>
         1. No GitHub, clica na sua foto (canto superior direito) → Settings<br>
         2. Desce até "Developer settings" (no menu esquerdo, bem embaixo)<br>
         3. "Personal access tokens" → "Tokens (classic)" → "Generate new token (classic)"<br>
         4. Marca a caixinha <b>"repo"</b> (dá acesso completo aos repositórios)<br>
-        5. Clica em "Generate token" e copia o código que aparece (começa com "ghp_") — cola ele aqui em cima
+        5. Clica em "Generate token" e copia o código que aparece (começa com "ghp_") — cola ele aqui em cima<br><br>
+        <b>Importante:</b> pra seu sócio conseguir usar o próprio token, primeiro adicione ele como colaborador no repositório: no GitHub, vá em <b>Settings → Collaborators → Add people</b> e digite o e-mail ou usuário dele do GitHub.
       </p>
     </div>
   </div>
 
   <div class="section">
+    <h2>🔑 Trocar senha do painel</h2>
+    <p class="hint">Essa senha é a mesma pra todo mundo que acessa o painel (você e seu sócio).</p>
+    <div class="row">
+      <div class="field"><label>Senha atual</label><input type="password" id="pwOld"></div>
+      <div class="field"><label>Nova senha</label><input type="password" id="pwNew"></div>
+    </div>
+    <button class="btn" onclick="changePassword()">Salvar nova senha</button>
+    <p class="status" id="pwChangeStatus"></p>
+    <p class="hint" style="margin-top:14px;">
+      <b>Esqueceu a senha?</b> Não tem "recuperar por e-mail" aqui — mas você sempre consegue resetar direto pelo GitHub:
+      abra o arquivo <b>content/admin-auth.json</b> no seu repositório, clica no lápis de editar, troca o valor de "senha" pelo que quiser, e salva (Commit changes). Funciona porque você é dona do repositório.
+    </p>
+  </div>
+
+  <div class="section">
     <h2>Identidade e aparência</h2>
     <div class="field"><label>Nome da empresa</label><input id="s_nome_empresa"></div>
+    <div class="field">
+      <label>Sua logo (opcional — substitui a logo padrão em todo o site)</label>
+      <input type="file" id="s_logo_file" accept="image/*">
+      <p class="hint" style="margin:6px 0 0;">Deixe em branco pra manter a logo atual.</p>
+    </div>
     <div class="row">
       <div class="field">
         <label>Paleta de cores</label>
@@ -116,8 +137,13 @@
         <select id="s_tema_fundo">
           <option value="caixotes">Ilustração de caixotes 3D</option>
           <option value="gradiente">Gradiente liso, sem ilustração</option>
+          <option value="custom">Minha própria imagem (enviar abaixo)</option>
         </select>
       </div>
+    </div>
+    <div class="field">
+      <label>Imagem de fundo personalizada (só se escolher "Minha própria imagem" acima)</label>
+      <input type="file" id="s_bg_file" accept="image/*">
     </div>
     <button class="btn" onclick="saveSettings()">Salvar identidade e aparência</button>
     <p class="status" id="settingsStatus"></p>
@@ -166,12 +192,32 @@
 </div>
 
 <script>
-  const PASSWORD = 'vectroprime2026';
   const CONFIG_KEY = 'vectro_admin_gh_config';
+  const OWNER = 'airtonrafael20-source';
+  const REPO = 'av-prime-site';
+  const BRANCH = 'main';
 
-  function tryUnlock(){
+  let CURRENT_PASSWORD = null;
+
+  async function fetchCurrentPassword(){
+    try{
+      const res = await fetch(`https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/content/admin-auth.json?t=${Date.now()}`, {cache:'no-store'});
+      if(res.ok){
+        const data = await res.json();
+        CURRENT_PASSWORD = data.senha || 'vectroprime2026';
+      } else {
+        CURRENT_PASSWORD = 'vectroprime2026';
+      }
+    }catch(e){
+      CURRENT_PASSWORD = 'vectroprime2026';
+    }
+  }
+  fetchCurrentPassword();
+
+  async function tryUnlock(){
     const val = document.getElementById('pwInput').value;
-    if(val === PASSWORD){
+    if(CURRENT_PASSWORD === null) await fetchCurrentPassword();
+    if(val === CURRENT_PASSWORD){
       sessionStorage.setItem('vectro_admin_unlocked', '1');
       showPanel();
     } else {
@@ -188,7 +234,11 @@
   if(sessionStorage.getItem('vectro_admin_unlocked') === '1') showPanel();
 
   function getConfig(){
-    try{ return JSON.parse(localStorage.getItem(CONFIG_KEY)) || {}; }catch(e){ return {}; }
+    try{
+      const cfg = JSON.parse(localStorage.getItem(CONFIG_KEY)) || {};
+      cfg.owner = OWNER; cfg.repo = REPO; cfg.branch = BRANCH;
+      return cfg;
+    }catch(e){ return { owner: OWNER, repo: REPO, branch: BRANCH }; }
   }
   function toggleConfig(){
     document.getElementById('configForm').classList.toggle('collapsed');
@@ -199,15 +249,15 @@
     document.getElementById('cfgRepo').value = cfg.repo || '';
     document.getElementById('cfgBranch').value = cfg.branch || 'main';
     document.getElementById('cfgToken').value = cfg.token || '';
-    if(!cfg.owner || !cfg.repo || !cfg.token){
+    if(!cfg.token){
       document.getElementById('configForm').classList.remove('collapsed');
     }
   }
   function saveConfig(){
     const cfg = {
-      owner: document.getElementById('cfgOwner').value.trim(),
-      repo: document.getElementById('cfgRepo').value.trim(),
-      branch: document.getElementById('cfgBranch').value.trim() || 'main',
+      owner: OWNER,
+      repo: REPO,
+      branch: BRANCH,
       token: document.getElementById('cfgToken').value.trim()
     };
     localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
@@ -226,8 +276,8 @@
   async function ghGetFile(path){
     const cfg = getConfig();
     if(!cfg.owner || !cfg.repo || !cfg.token) throw new Error('Conexão com o GitHub não configurada.');
-    const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}?ref=${cfg.branch}`;
-    const res = await fetch(url, { headers: { Authorization: `token ${cfg.token}` } });
+    const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}?ref=${cfg.branch}&_=${Date.now()}`;
+    const res = await fetch(url, { headers: { Authorization: `token ${cfg.token}` }, cache: 'no-store' });
     if(!res.ok) throw new Error('Não encontrei o arquivo ' + path + ' (status ' + res.status + ')');
     const data = await res.json();
     const content = decodeURIComponent(escape(atob(data.content)));
@@ -238,20 +288,29 @@
     const cfg = getConfig();
     if(!cfg.owner || !cfg.repo || !cfg.token) throw new Error('Conexão com o GitHub não configurada — preencha a seção "Conexão com o GitHub" no topo.');
     const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`;
-    let sha = null;
-    try{
-      const getRes = await fetch(url + `?ref=${cfg.branch}`, { headers: { Authorization: `token ${cfg.token}` } });
+
+    async function attempt(){
+      let sha = null;
+      const getRes = await fetch(url + `?ref=${cfg.branch}&_=${Date.now()}`, { headers: { Authorization: `token ${cfg.token}` }, cache: 'no-store' });
       if(getRes.ok){ const data = await getRes.json(); sha = data.sha; }
-    }catch(e){ /* file may not exist yet */ }
-    const contentStr = JSON.stringify(obj, null, 2);
-    const b64 = btoa(unescape(encodeURIComponent(contentStr)));
-    const body = { message: message, content: b64, branch: cfg.branch };
-    if(sha) body.sha = sha;
-    const putRes = await fetch(url, {
-      method: 'PUT',
-      headers: { Authorization: `token ${cfg.token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
+      const contentStr = JSON.stringify(obj, null, 2);
+      const b64 = btoa(unescape(encodeURIComponent(contentStr)));
+      const body = { message: message, content: b64, branch: cfg.branch };
+      if(sha) body.sha = sha;
+      return fetch(url, {
+        method: 'PUT',
+        headers: { Authorization: `token ${cfg.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    }
+
+    let putRes = await attempt();
+    if(putRes.status === 409){
+      // Someone/something changed the file between our GET and PUT (or a
+      // cached response gave us a stale sha) — refetch and retry once with
+      // the true current sha before giving up.
+      putRes = await attempt();
+    }
     if(!putRes.ok){
       const errData = await putRes.json().catch(()=>({}));
       throw new Error('Falha ao salvar (' + putRes.status + '): ' + (errData.message || 'erro desconhecido'));
@@ -294,6 +353,36 @@
     }catch(e){ renderCatalogo([]); }
   }
 
+  function readFileAsBase64(file){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function ghSaveBinaryFile(path, base64Content, message){
+    const cfg = getConfig();
+    if(!cfg.token) throw new Error('Falta seu token de acesso — preencha "Conexão com o GitHub" no topo.');
+    const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`;
+    let sha = null;
+    const getRes = await fetch(url + `?ref=${cfg.branch}&_=${Date.now()}`, { headers: { Authorization: `token ${cfg.token}` }, cache: 'no-store' });
+    if(getRes.ok){ const data = await getRes.json(); sha = data.sha; }
+    const body = { message: message, content: base64Content, branch: cfg.branch };
+    if(sha) body.sha = sha;
+    const putRes = await fetch(url, {
+      method: 'PUT',
+      headers: { Authorization: `token ${cfg.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if(!putRes.ok){
+      const errData = await putRes.json().catch(()=>({}));
+      throw new Error('Falha ao enviar imagem (' + putRes.status + '): ' + (errData.message || 'erro desconhecido'));
+    }
+    return true;
+  }
+
   async function saveSettings(){
     try{
       const current = await ghGetFile('content/settings.json').catch(()=>({json:{}}));
@@ -302,9 +391,48 @@
         paleta: document.getElementById('s_paleta').value,
         tema_fundo: document.getElementById('s_tema_fundo').value
       });
+
+      const logoFile = document.getElementById('s_logo_file').files[0];
+      if(logoFile){
+        const ext = logoFile.name.split('.').pop().toLowerCase();
+        const b64 = await readFileAsBase64(logoFile);
+        const path = 'images/logo/logo-custom.' + ext;
+        await ghSaveBinaryFile(path, b64, 'Atualiza logo personalizada');
+        obj.logo_path = '/' + path;
+      }
+
+      const bgFile = document.getElementById('s_bg_file').files[0];
+      if(bgFile){
+        const ext = bgFile.name.split('.').pop().toLowerCase();
+        const b64 = await readFileAsBase64(bgFile);
+        const path = 'images/fundo/fundo-custom.' + ext;
+        await ghSaveBinaryFile(path, b64, 'Atualiza imagem de fundo personalizada');
+        obj.imagem_fundo_hero = '/' + path;
+      }
+
       await ghSaveFile('content/settings.json', obj, 'Atualiza identidade e aparência do site');
-      showStatus('settingsStatus', true, 'Salvo! O site atualiza em cerca de 1 minuto.');
+      showStatus('settingsStatus', true, 'Salvo! O site atualiza em poucos segundos.');
     }catch(e){ showStatus('settingsStatus', false, e.message); }
+  }
+
+  async function changePassword(){
+    const oldVal = document.getElementById('pwOld').value;
+    const newVal = document.getElementById('pwNew').value;
+    if(oldVal !== CURRENT_PASSWORD){
+      showStatus('pwChangeStatus', false, 'Senha atual incorreta.');
+      return;
+    }
+    if(!newVal || newVal.length < 4){
+      showStatus('pwChangeStatus', false, 'A nova senha precisa ter pelo menos 4 caracteres.');
+      return;
+    }
+    try{
+      await ghSaveFile('content/admin-auth.json', { senha: newVal }, 'Atualiza senha do painel administrativo');
+      CURRENT_PASSWORD = newVal;
+      document.getElementById('pwOld').value = '';
+      document.getElementById('pwNew').value = '';
+      showStatus('pwChangeStatus', true, 'Senha alterada! Use a nova senha no próximo acesso.');
+    }catch(e){ showStatus('pwChangeStatus', false, e.message); }
   }
 
   async function saveContato(){
@@ -315,7 +443,7 @@
         whatsapp_numero: document.getElementById('c_whats').value.trim().replace(/\D/g,'')
       };
       await ghSaveFile('content/contato.json', obj, 'Atualiza contato do site');
-      showStatus('contatoStatus', true, 'Salvo! O site atualiza em cerca de 1 minuto.');
+      showStatus('contatoStatus', true, 'Salvo! O site atualiza em poucos segundos.');
     }catch(e){ showStatus('contatoStatus', false, e.message); }
   }
 
@@ -338,7 +466,7 @@
     try{
       const formas = Array.from(document.querySelectorAll('.pg-forma')).map(i=>i.value.trim()).filter(Boolean);
       await ghSaveFile('content/pagamento.json', { formas }, 'Atualiza formas de pagamento');
-      showStatus('pagamentoStatus', true, 'Salvo! O site atualiza em cerca de 1 minuto.');
+      showStatus('pagamentoStatus', true, 'Salvo! O site atualiza em poucos segundos.');
     }catch(e){ showStatus('pagamentoStatus', false, e.message); }
   }
 
@@ -372,7 +500,7 @@
         texto: b.querySelector('.dep-texto').value.trim()
       })).filter(d => d.nome && d.texto);
       await ghSaveFile('content/depoimentos.json', { depoimentos: deps }, 'Atualiza depoimentos');
-      showStatus('depoimentosStatus', true, 'Salvo! O site atualiza em cerca de 1 minuto.');
+      showStatus('depoimentosStatus', true, 'Salvo! O site atualiza em poucos segundos.');
     }catch(e){ showStatus('depoimentosStatus', false, e.message); }
   }
 
@@ -429,7 +557,7 @@
         };
       }).filter(g => g.nome);
       await ghSaveFile('content/catalogo.json', { grupos }, 'Atualiza catálogo de serviços e preços');
-      showStatus('catalogoStatus', true, 'Salvo! O site atualiza em cerca de 1 minuto.');
+      showStatus('catalogoStatus', true, 'Salvo! O site atualiza em poucos segundos.');
     }catch(e){ showStatus('catalogoStatus', false, e.message); }
   }
 
