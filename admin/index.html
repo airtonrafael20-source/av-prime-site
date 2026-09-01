@@ -114,7 +114,7 @@
     <div class="field">
       <label>Sua logo (opcional — substitui a logo padrão em todo o site)</label>
       <input type="file" id="s_logo_file" accept="image/*">
-      <p class="hint" style="margin:6px 0 0;">Deixe em branco pra manter a logo atual.</p>
+      <p class="hint" style="margin:6px 0 0;">Deixe em branco pra manter a logo atual. <span class="config-toggle" onclick="removeLogo()">remover logo personalizada e voltar pra padrão</span></p>
     </div>
     <div class="row">
       <div class="field">
@@ -144,6 +144,7 @@
     <div class="field">
       <label>Imagem de fundo personalizada (só se escolher "Minha própria imagem" acima)</label>
       <input type="file" id="s_bg_file" accept="image/*">
+      <p class="hint" style="margin:6px 0 0;"><span class="config-toggle" onclick="removeBackground()">remover imagem de fundo e voltar pros caixotes 3D</span></p>
     </div>
     <button class="btn" onclick="saveSettings()">Salvar identidade e aparência</button>
     <p class="status" id="settingsStatus"></p>
@@ -383,6 +384,27 @@
     return true;
   }
 
+  async function removeLogo(){
+    try{
+      const current = await ghGetFile('content/settings.json').catch(()=>({json:{}}));
+      const obj = Object.assign({}, current.json, { logo_path: '' });
+      await ghSaveFile('content/settings.json', obj, 'Remove logo personalizada, volta pra padrão');
+      document.getElementById('s_logo_file').value = '';
+      showStatus('settingsStatus', true, 'Logo padrão restaurada.');
+    }catch(e){ showStatus('settingsStatus', false, e.message); }
+  }
+
+  async function removeBackground(){
+    try{
+      const current = await ghGetFile('content/settings.json').catch(()=>({json:{}}));
+      const obj = Object.assign({}, current.json, { imagem_fundo_hero: '', tema_fundo: 'caixotes' });
+      await ghSaveFile('content/settings.json', obj, 'Remove fundo personalizado, volta pros caixotes 3D');
+      document.getElementById('s_bg_file').value = '';
+      document.getElementById('s_tema_fundo').value = 'caixotes';
+      showStatus('settingsStatus', true, 'Fundo padrão (caixotes 3D) restaurado.');
+    }catch(e){ showStatus('settingsStatus', false, e.message); }
+  }
+
   async function saveSettings(){
     try{
       const current = await ghGetFile('content/settings.json').catch(()=>({json:{}}));
@@ -408,6 +430,7 @@
         const path = 'images/fundo/fundo-custom.' + ext;
         await ghSaveBinaryFile(path, b64, 'Atualiza imagem de fundo personalizada');
         obj.imagem_fundo_hero = '/' + path;
+        obj.tema_fundo = 'custom';
       }
 
       await ghSaveFile('content/settings.json', obj, 'Atualiza identidade e aparência do site');
