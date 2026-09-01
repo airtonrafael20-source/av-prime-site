@@ -1,7 +1,7 @@
 {
   "nome_empresa": "Vectro Prime Consultoria & Almoxarifado",
-  "logo_path": "",
-  "paleta": "navy_teal",
+  "logo_path": "/images/logo/logo-custom.jpg",
+  "paleta": "black_gold",
   "tema_fundo": "caixotes",
-  "imagem_fundo_hero": ""
+  "imagem_fundo_hero": "/images/fundo/fundo-custom.png"
 }
